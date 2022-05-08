@@ -15,15 +15,6 @@ def create_callback_data(action, year, month, day):
     return ";".join([action, str(year), str(month), str(day)])
 
 
-def exit_string_data(data):
-    """
-    Делает список для callback
-    :param data:
-    :return:
-    """
-    return data.split(';')
-
-
 def bot_get_keyboard_inline(year=None, month=None) -> InlineKeyboardMarkup:
     """
     Функция делает Inline клавиатуру-календарь
@@ -56,4 +47,3 @@ def bot_get_keyboard_inline(year=None, month=None) -> InlineKeyboardMarkup:
         InlineKeyboardButton('>>', callback_data=create_callback_data('Next-month', year, month, day=1)),
     )
     return keyboard
-
