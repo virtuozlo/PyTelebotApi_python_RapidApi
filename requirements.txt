@@ -1,2 +1,9 @@
 pyTelegramBotAPI==4.4.0
 python-dotenv==0.19.2
+pip~=22.0.4
+wheel~=0.37.1
+certifi~=2021.10.8
+requests~=2.27.1
+idna~=3.3
+urllib3~=1.26.9
+setuptools~=62.0.0
