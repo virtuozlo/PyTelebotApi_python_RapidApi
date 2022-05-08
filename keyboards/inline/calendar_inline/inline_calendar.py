@@ -56,3 +56,4 @@ def bot_get_keyboard_inline(year=None, month=None) -> InlineKeyboardMarkup:
         InlineKeyboardButton('>>', callback_data=create_callback_data('Next-month', year, month, day=1)),
     )
     return keyboard
+
