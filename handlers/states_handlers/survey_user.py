@@ -1,5 +1,6 @@
 from states.survey_user_states import MyStates
 from loader import bot
+from database.user_db import filling_db
 
 
 @bot.message_handler(commands=['survey'])
@@ -8,16 +9,9 @@ def start_ex(message):
     Команда старт. Присваивается этап 'name'
     """
     bot.set_state(message.from_user.id, MyStates.name, message.chat.id)
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['id'] = message.from_user.id
     bot.send_message(message.chat.id, 'Привет! Напиши свое имя.')
-
-
-@bot.message_handler(state="*", commands='cancel')
-def any_state(message):
-    """
-    Отмена этапов
-    """
-    bot.send_message(message.chat.id, "Твои этапы отменены.")
-    bot.delete_state(message.from_user.id, message.chat.id)
 
 
 @bot.message_handler(state=MyStates.name)
@@ -48,9 +42,11 @@ def ready_for_answer(message):
     Этап 3. Запуск метода когда у пользователя state=age.Идет проверка на ввод числа
     """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['age'] = int(message.text)
         bot.send_message(message.chat.id,
                          "Готово. Твоя информация:\n<b>Имя: {name}\nФамилия: {surname}\nВозраст: {age}</b>".format(
                              name=data['name'], surname=data['surname'], age=message.text), parse_mode="html")
+        filling_db(data)
     bot.delete_state(message.from_user.id, message.chat.id)
 
 
