@@ -1,9 +1,11 @@
 import requests
+from config_data.my_config import RAPID_API_KEY
+
 
 url = "https://hotels4.p.rapidapi.com/properties/list"
 headers = {
     "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
-    "X-RapidAPI-Key": "45ca137abamsh5d62bed4e61a537p1d864bjsn0d950981ab77"
+    "X-RapidAPI-Key": RAPID_API_KEY
 }
 
 
