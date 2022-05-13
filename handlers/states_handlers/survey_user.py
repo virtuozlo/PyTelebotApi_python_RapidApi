@@ -14,15 +14,6 @@ def start_ex(message):
     bot.send_message(message.chat.id, 'Привет! Напиши свое имя.')
 
 
-@bot.message_handler(state="*", commands='cancel')
-def any_state(message):
-    """
-    Отмена этапов
-    """
-    bot.send_message(message.chat.id, "Твои этапы отменены.")
-    bot.delete_state(message.from_user.id, message.chat.id)
-
-
 @bot.message_handler(state=MyStates.name)
 def name_get(message):
     """
