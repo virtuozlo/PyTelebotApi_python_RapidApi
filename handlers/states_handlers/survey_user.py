@@ -1,6 +1,5 @@
 from states.survey_user_states import MyStates
-from loader import bot
-from database.user_db import filling_db
+from loader import bot, db_user
 
 
 @bot.message_handler(commands=['survey'])
@@ -8,6 +7,8 @@ def start_ex(message):
     """
     Команда старт. Присваивается этап 'name'
     """
+    if not db_user.check_user(message.from_user.id):
+        db_user.add_user(message.from_user.id)
     bot.set_state(message.from_user.id, MyStates.name, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['id'] = message.from_user.id
@@ -46,7 +47,7 @@ def ready_for_answer(message):
         bot.send_message(message.chat.id,
                          "Готово. Твоя информация:\n<b>Имя: {name}\nФамилия: {surname}\nВозраст: {age}</b>".format(
                              name=data['name'], surname=data['surname'], age=message.text), parse_mode="html")
-        filling_db(data)
+        db_user.filling_db(data)
     bot.delete_state(message.from_user.id, message.chat.id)
 
 
