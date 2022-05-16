@@ -3,8 +3,7 @@ from datetime import date
 from telebot.types import InputMediaPhoto
 
 from loader import bot
-from states.search_info import SearchStates
-from keyboards.reply.cancel_states import cancel_status_keyboard
+from states.search_info import LowPriceStates
 from keyboards.inline.filter import for_search, for_button
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
 from keyboards.inline.photo_button import get_button_photo
@@ -20,7 +19,7 @@ def start_lowprice(message):
     :param message:
     :return:
     """
-    bot.set_state(message.from_user.id, SearchStates.cities, message.chat.id)
+    bot.set_state(message.from_user.id, LowPriceStates.cities, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['id'] = message.from_user.id
         data['SortOrder'] = 'PRICE'
@@ -29,7 +28,7 @@ def start_lowprice(message):
     bot.send_message(message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите город для поиска.')
 
 
-@bot.message_handler(state=SearchStates.cities)
+@bot.message_handler(state=LowPriceStates.cities)
 def get_cities_request(message):
     """
     Вывод кнопок городов и их обработка
@@ -43,7 +42,7 @@ def get_cities_request(message):
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
             bot.send_message(message.chat.id, 'Нет подходящего варианта попробуйте еще раз')
-            bot.set_state(message.from_user.id, SearchStates.cities)
+            bot.set_state(message.from_user.id, LowPriceStates.cities)
 
 
 @bot.callback_query_handler(func=None, button_config=for_button.filter())
@@ -59,7 +58,7 @@ def button_callback(call):
         data['destid'] = destid
         data['city'] = name
         bot.edit_message_text(f'Отличный выбор {name}', call.message.chat.id, call.message.id)
-    bot.set_state(call.from_user.id, SearchStates.start_date, call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.start_date, call.message.chat.id)
     bot.send_message(call.message.chat.id, f'Выберите даты заезда',
                      reply_markup=bot_get_keyboard_inline(command='lowprice', state='start_date'))
 
@@ -74,7 +73,7 @@ def callback_start_date(call):
     bot.send_message(call.message.chat.id, 'Выберите дату уезда',
                      reply_markup=bot_get_keyboard_inline(command='lowprice', state='end_date',
                                                           start_date=my_exit_date))
-    bot.set_state(call.from_user.id, SearchStates.end_date, call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.end_date, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['startday'] = my_exit_date
         bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
@@ -87,7 +86,7 @@ def callback_end_date(call):
     """
     data = for_search.parse(callback_data=call.data)
     my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
-    bot.set_state(call.from_user.id, SearchStates.count_hotels, call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.count_hotels, call.message.chat.id)
     bot.send_message(call.message.chat.id, 'Сколько отелей выводить? ( не более 10)')
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['endday'] = my_exit_date
@@ -96,7 +95,7 @@ def callback_end_date(call):
         bot.edit_message_text(f'Дата выезда: {my_exit_date}', call.message.chat.id, call.message.id)
 
 
-@bot.message_handler(state=SearchStates.count_hotels, is_digit=True, count_digit=True, )
+@bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=True, )
 def get_photo_info(message):
     """
     Запрос фотографий отелей. Запись количества отелей
@@ -106,7 +105,7 @@ def get_photo_info(message):
     bot.send_message(message.chat.id, f'Буду выводить {message.text} отелей')
     bot.send_message(message.chat.id, f'Нужны фото отелей?',
                      reply_markup=get_button_photo())
-    bot.set_state(message.from_user.id, SearchStates.photo, message.chat.id)
+    bot.set_state(message.from_user.id, LowPriceStates.photo, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_hotels'] = message.text
 
@@ -126,12 +125,12 @@ def get_photo_count_info(call):
     :return:
     """
     bot.edit_message_text('Сколько фото выводить?(Не более 10)', call.message.chat.id, call.message.id)
-    bot.set_state(call.from_user.id, SearchStates.count_photo, call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.count_photo, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['photo'] = True
 
 
-@bot.message_handler(state=SearchStates.count_photo, is_digit=True, count_digit=True)
+@bot.message_handler(state=LowPriceStates.count_photo, is_digit=True, count_digit=True)
 def get_photo_info(message):
     """
     Запись количества фото отелей. Здесь нужно вызывать функцию обработки
@@ -144,7 +143,7 @@ def get_photo_info(message):
     user_is_ready(message)
 
 
-@bot.message_handler(state=SearchStates.count_hotels, is_digit=True, count_digit=False)
+@bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=False)
 def dont_check_count(message):
     """
     Ввели числа не в диапазоне
@@ -154,7 +153,7 @@ def dont_check_count(message):
     bot.send_message(message.chat.id, 'Введите число в диапазоне от 1 до 10')
 
 
-@bot.message_handler(state=SearchStates.count_hotels, is_digit=False)
+@bot.message_handler(state=LowPriceStates.count_hotels, is_digit=False)
 def count_incorrect(message):
     """
     Ввел не цифру
@@ -164,7 +163,7 @@ def count_incorrect(message):
     bot.send_message(message.chat.id, 'Введите количество в цифрах')
 
 
-@bot.message_handler(state=SearchStates.count_photo, is_digit=False)
+@bot.message_handler(state=LowPriceStates.count_photo, is_digit=False)
 def count_incorrect(message):
     """
     Ввел не цифру
@@ -174,7 +173,7 @@ def count_incorrect(message):
     bot.send_message(message.chat.id, 'Введите количество в цифрах')
 
 
-@bot.message_handler(state=SearchStates.count_photo, is_digit=True, count_digit=False)
+@bot.message_handler(state=LowPriceStates.count_photo, is_digit=True, count_digit=False)
 def dont_check_count(message):
     """
     Ввели числа не в диапазоне

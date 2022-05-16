@@ -14,6 +14,7 @@ DEFAULT_COMMANDS = (
     ('calendar', "Запустить календарь"),
     ('lowprice', 'Поиск бюджетных отелей'),
     ('survey', 'Запустить опрос пользователя'),
+    ('highprice', 'Поиск лучших отелей')
 )
 url_from_cities = "https://hotels4.p.rapidapi.com/locations/v2/search"
 url_from_properties = "https://hotels4.p.rapidapi.com/properties/list"
