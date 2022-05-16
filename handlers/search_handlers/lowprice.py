@@ -1,6 +1,6 @@
 from datetime import date
 
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, Message, CallbackQuery
 
 from loader import bot
 from states.search_info import LowPriceStates
@@ -13,11 +13,9 @@ from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
 
 
 @bot.message_handler(commands=['lowprice'])
-def start_lowprice(message):
+def start_lowprice(message: Message) -> None:
     """
     Начало работы команды поиска дешёвых отелей
-    :param message:
-    :return:
     """
     bot.set_state(message.from_user.id, LowPriceStates.cities, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -29,11 +27,9 @@ def start_lowprice(message):
 
 
 @bot.message_handler(state=LowPriceStates.cities)
-def get_cities_request(message):
+def get_cities_request(message: Message) -> None:
     """
     Вывод кнопок городов и их обработка
-    :param message:
-    :return:
     """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['city'] = message.text
@@ -46,11 +42,9 @@ def get_cities_request(message):
 
 
 @bot.callback_query_handler(func=None, button_config=for_button.filter())
-def button_callback(call):
+def button_callback(call: CallbackQuery) -> None:
     """
     Обработка кнопок городов
-    :param call:
-    :return:
     """
     callback_data = for_button.parse(callback_data=call.data)
     name, destid = callback_data['name'], int(callback_data['destid'])
@@ -64,7 +58,7 @@ def button_callback(call):
 
 
 @bot.callback_query_handler(func=None, search_config=for_search.filter(state='start_date'))
-def callback_start_date(call):
+def callback_start_date(call: CallbackQuery) -> None:
     """
     :param call: Выбор пользователя начала поездки
     """
@@ -80,7 +74,7 @@ def callback_start_date(call):
 
 
 @bot.callback_query_handler(func=None, search_config=for_search.filter(state='end_date'))
-def callback_end_date(call):
+def callback_end_date(call: CallbackQuery) -> None:
     """
     :param call: Окончание поездки
     """
@@ -96,11 +90,9 @@ def callback_end_date(call):
 
 
 @bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=True, )
-def get_photo_info(message):
+def get_photo_info(message: Message) -> None:
     """
     Запрос фотографий отелей. Запись количества отелей
-    :param message:
-    :return:
     """
     bot.send_message(message.chat.id, f'Буду выводить {message.text} отелей')
     bot.send_message(message.chat.id, f'Нужны фото отелей?',
@@ -111,7 +103,7 @@ def get_photo_info(message):
 
 
 @bot.callback_query_handler(func=None, is_photo=False)
-def hot_photo(call):
+def hot_photo(call: CallbackQuery) -> None:
     bot.edit_message_text(f'Вывожу результаты', call.message.chat.id, call.message.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['photo'] = ''
@@ -119,10 +111,9 @@ def hot_photo(call):
 
 
 @bot.callback_query_handler(func=None, is_photo=True)
-def get_photo_count_info(call):
+def get_photo_count_info(call: CallbackQuery) -> None:
     """
     Запрос количества фотографий отелей. Запись необходимости фото
-    :return:
     """
     bot.edit_message_text('Сколько фото выводить?(Не более 10)', call.message.chat.id, call.message.id)
     bot.set_state(call.from_user.id, LowPriceStates.count_photo, call.message.chat.id)
@@ -131,12 +122,10 @@ def get_photo_count_info(call):
 
 
 @bot.message_handler(state=LowPriceStates.count_photo, is_digit=True, count_digit=True)
-def get_photo_info(message):
+def get_photo_info(message: Message) -> None:
     """
     Запись количества фото отелей. Здесь нужно вызывать функцию обработки
      информации(в которой будет отправка сообщения в чат с результатами)
-    :param message:
-    :return:
     """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_photo'] = message.text
@@ -144,7 +133,7 @@ def get_photo_info(message):
 
 
 @bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=False)
-def dont_check_count(message):
+def dont_check_count(message: Message) -> None:
     """
     Ввели числа не в диапазоне
     :param message:
@@ -154,39 +143,34 @@ def dont_check_count(message):
 
 
 @bot.message_handler(state=LowPriceStates.count_hotels, is_digit=False)
-def count_incorrect(message):
+def count_incorrect(message: Message) -> None:
     """
     Ввел не цифру
-    :param message:
-    :return:
     """
     bot.send_message(message.chat.id, 'Введите количество в цифрах')
 
 
 @bot.message_handler(state=LowPriceStates.count_photo, is_digit=False)
-def count_incorrect(message):
+def count_incorrect(message: Message) -> None:
     """
     Ввел не цифру
-    :param message:
-    :return:
     """
     bot.send_message(message.chat.id, 'Введите количество в цифрах')
 
 
 @bot.message_handler(state=LowPriceStates.count_photo, is_digit=True, count_digit=False)
-def dont_check_count(message):
+def dont_check_count(message: Message) -> None:
     """
     Ввели числа не в диапазоне
-    :param message:
-    :return:
     """
     bot.send_message(message.chat.id, 'Введите число в диапазоне от 1 до 10')
 
 
-def user_is_ready(message, user_id=None, chat_id=None):
+def user_is_ready(message: Message, user_id=None, chat_id=None) -> None:
     """
     Отсюда вызывается метод для обнаружения всех отелей. Здесь же будет записи в БД, может Pickle.
     Всё будет в модуле utils
+    :param message: Message
     :param user_id: На случай перехода с коллбека
     :param chat_id: На случай перехода с коллбека
     :return:
