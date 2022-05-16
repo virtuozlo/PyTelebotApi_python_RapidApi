@@ -1,11 +1,9 @@
 from loader import bot
+from keyboards.inline.calendar_inline.filter import bind_filters
 import handlers
-from database.user_db import set_up_db
 from utils.set_bot_commands import set_default_commands
 
 if __name__ == '__main__':
-    # bot.stop_bot()
     set_default_commands(bot)
-    set_up_db()
-    # bot.infinity_polling()
+    bind_filters(bot)
     bot.polling(none_stop=True)
