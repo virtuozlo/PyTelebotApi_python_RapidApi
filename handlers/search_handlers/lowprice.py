@@ -1,13 +1,15 @@
+from datetime import date
+
 from loader import bot
 from states.search_info import SearchStates
 from keyboards.reply.boolean_keyboard import boolean_keyboard
 from keyboards.reply.cancel_states import cancel_status_keyboard, cancel_states_button
+from keyboards.inline.calendar_inline.filter import for_search
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
 from utils.requests_rapidApi.get_properties_list import get_properties_list
-from utils.misc.analyze_callback_calendar import exit_date
 
 
-@bot.message_handler(commands=['lowprice', ])
+@bot.message_handler(commands=['lowprice'])
 def start_lowprice(message):
     """
     Начало работы команды поиска дешёвых отелей
@@ -21,35 +23,32 @@ def start_lowprice(message):
         data['locale'] = 'ru_RU'
         data['currency'] = 'USD'
     bot.send_message(message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите дату заезда.',
-                     reply_markup=bot_get_keyboard_inline())
+                     reply_markup=bot_get_keyboard_inline(command='lowprice'))
 
 
-#               Здесь вводить город для поиска с выводом их в кнопках
-
-
-#                Здесь будут коллбэки на города и запись DestId
-
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith('DAY'))
-def callback_inline(call):
+@bot.callback_query_handler(func=None, search_config=for_search.filter())
+def callback_lowprice(call):
     """
     Ловит выбор пользователя с календаря. Выводит дату либо меняет месяц
     :param call: Выбор пользователя
     """
+    print('lowprice')
     state = bot.get_state(call.from_user.id, call.message.chat.id)
+    data = for_search.parse(callback_data=call.data)
+    my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
     if state == SearchStates.start_date:
-        bot.send_message(call.message.chat.id, 'Выберите дату уезда', reply_markup=bot_get_keyboard_inline())
+        bot.send_message(call.message.chat.id, 'Выберите дату уезда',
+                         reply_markup=bot_get_keyboard_inline(command='lowprice'))
         bot.set_state(call.from_user.id, SearchStates.end_date, call.message.chat.id)
         with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-            data['startday'] = exit_date(call.data)
-            bot.edit_message_text(f'Дата заезда: {data["startday"]}', call.message.chat.id, call.message.id,
-                                  )
+            data['startday'] = my_exit_date
+            bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
     elif state == SearchStates.end_date:
         bot.send_message(call.message.chat.id, 'Выберите город.')
         bot.set_state(call.from_user.id, SearchStates.city, call.message.chat.id)
         with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-            data['endday'] = exit_date(call.data)
-            bot.edit_message_text(f'Дата выезда: {data["endday"]}', call.message.chat.id, call.message.id)
+            data['endday'] = my_exit_date
+            bot.edit_message_text(f'Дата выезда: {my_exit_date}', call.message.chat.id, call.message.id)
 
 
 @bot.message_handler(state=SearchStates.city)
