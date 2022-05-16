@@ -1,6 +1,6 @@
 from loader import bot
-from keyboards.inline.calendar_inline.filter import bind_filters
 import handlers
+from keyboards.inline.filter import bind_filters
 from utils.set_bot_commands import set_default_commands
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import calendar
 from datetime import date
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from loader import bot
-from .filter import calendar_factory, my_date, for_search
+from keyboards.inline.filter import calendar_factory, my_date, for_search
 
 
 def get_next_or_prev_mont(action, year, month):
@@ -28,7 +28,8 @@ def get_next_or_prev_mont(action, year, month):
     return bot_get_keyboard_inline(year=year, month=month)
 
 
-def bot_get_keyboard_inline(year=None, month=None, command='calendar') -> InlineKeyboardMarkup:
+def bot_get_keyboard_inline(year=None, month=None, command='calendar', state=None,
+                            start_date=None) -> InlineKeyboardMarkup:
     """
     Функция делает Inline клавиатуру-календарь
 
@@ -42,6 +43,7 @@ def bot_get_keyboard_inline(year=None, month=None, command='calendar') -> Inline
     year = date.today().year if year is None else year
     my_calendar = calendar.monthcalendar(year, month)
     for_data = my_date if command == 'calendar' else for_search
+    need_date = ' ' if start_date is None else start_date
     keyboard = InlineKeyboardMarkup()
     empty_data = 'EMPTY'  # Пустая дата для месяца и дня недели
 
@@ -56,7 +58,9 @@ def bot_get_keyboard_inline(year=None, month=None, command='calendar') -> Inline
             if day == 0:
                 row.append(InlineKeyboardButton(' ', callback_data=empty_data))
             else:
-                row.append(InlineKeyboardButton(day, callback_data=for_data.new(year=year, month=month, day=day)))
+                row.append(
+                    InlineKeyboardButton(day, callback_data=for_data.new(year=year, month=month, day=day, state=state,
+                                                                         start_date=need_date)))
         keyboard.add(*row, row_width=7)
     keyboard.add(
         InlineKeyboardButton('<<', callback_data=calendar_factory.new(action="prev", year=year, month=month)),

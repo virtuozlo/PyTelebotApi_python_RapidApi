@@ -15,3 +15,11 @@ DEFAULT_COMMANDS = (
     ('lowprice', 'Поиск бюджетных отелей'),
     ('survey', 'Запустить опрос пользователя'),
 )
+url_from_cities = "https://hotels4.p.rapidapi.com/locations/v2/search"
+url_from_properties = "https://hotels4.p.rapidapi.com/properties/list"
+url_from_photo = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
+
+headers = {
+    "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
+    "X-RapidAPI-Key": RAPID_API_KEY
+}
