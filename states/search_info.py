@@ -7,17 +7,20 @@ from telebot.storage import StateMemoryStorage
 state_storage = StateMemoryStorage()
 
 
-class SearchStates(StatesGroup):
-    ready=State()
-    cities= State()
-    city = State()
-    sortOrder=State()
+class LowPriceStates(StatesGroup):
+    cities = State()
     count_hotels = State()
     photo = State()
     count_photo = State()
-    min_price = State()
-    max_price = State()
-    distance = State()
+    start_date = State()
+    end_date = State()
+
+
+class HighPriceStates(StatesGroup):
+    cities = State()
+    count_hotels = State()
+    photo = State()
+    count_photo = State()
     start_date = State()
     end_date = State()
 

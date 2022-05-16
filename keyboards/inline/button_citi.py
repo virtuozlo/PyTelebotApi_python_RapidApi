@@ -9,11 +9,9 @@ def get_button_cities(dict_buttons):
     """
     if not dict_buttons:
         return 'Не нашел подходящего города'
-    print(dict_buttons.items())
     keyboard = InlineKeyboardMarkup(row_width=1)
     keyboard.add(*[
         InlineKeyboardButton(name, callback_data=for_button.new(name=name[:10], destid=int(data)))
         for name, data in dict_buttons.items() if len(data) <= 10
     ])
-    print(len(keyboard.keyboard))
     return keyboard
