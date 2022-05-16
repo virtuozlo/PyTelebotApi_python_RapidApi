@@ -1,9 +1,16 @@
+from typing import Optional
+
 import requests
 import json
 from config_data.my_config import url_from_photo, headers
 
 
-def get_photo_hotel(sity_id, count_photo):
+def get_photo_hotel(sity_id: int, count_photo: str) -> Optional[list, bool]:
+    """
+    :param sity_id: Идентификатор города
+    :param count_photo: Количество фото
+    :return: список url фото
+    """
     media = []
     querystring = {
         'id': sity_id

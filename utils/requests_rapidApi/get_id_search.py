@@ -1,11 +1,16 @@
 import re
+from typing import Optional
+
 import requests
 import json
+
+from telebot.types import InlineKeyboardMarkup
+
 from config_data.my_config import url_from_cities, headers
 from keyboards.inline.button_citi import get_button_cities
 
 
-def get_dest_id(city, locale, currency):
+def get_dest_id(city: str, locale: str, currency: str) -> Optional[str, InlineKeyboardMarkup]:
     """
     :param city: Город поиска
     :param locale: Локаль от выбранного языка

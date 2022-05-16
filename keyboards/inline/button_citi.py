@@ -1,8 +1,10 @@
+from typing import Optional
+
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from keyboards.inline.filter import for_button
 
 
-def get_button_cities(dict_buttons):
+def get_button_cities(dict_buttons: dict) -> Optional[str, InlineKeyboardMarkup]:
     """
     :param dict_buttons: словарь. ключ-название города значение-Destid
     :return: InlineKeyboardMarkup
