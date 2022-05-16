@@ -1,7 +1,7 @@
 from loader import bot
 from datetime import date
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
-from keyboards.inline.calendar_inline.filter import my_date
+from keyboards.inline.filter import my_date
 
 
 @bot.message_handler(commands=['calendar'])

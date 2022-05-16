@@ -8,6 +8,8 @@ state_storage = StateMemoryStorage()
 
 
 class SearchStates(StatesGroup):
+    ready=State()
+    cities= State()
     city = State()
     sortOrder=State()
     count_hotels = State()
