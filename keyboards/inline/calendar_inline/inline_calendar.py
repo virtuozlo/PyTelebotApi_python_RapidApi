@@ -5,7 +5,7 @@ from loader import bot
 from keyboards.inline.filter import calendar_factory, my_date, for_search
 
 
-def get_next_or_prev_mont(action, year, month):
+def get_next_or_prev_mont(action, year, month, command=None, state=None):
     """
     Функция корректирует год и месяц если пользователь нажал на стрелочки выбора месяца
     :param action: След или предыдущий месяц
@@ -25,11 +25,12 @@ def get_next_or_prev_mont(action, year, month):
             month = 12
         else:
             month -= 1
-    return bot_get_keyboard_inline(year=year, month=month)
+    return bot_get_keyboard_inline(year=year, month=month) if command is None else bot_get_keyboard_inline(year, month,
+                                                                                                           command,
+                                                                                                           state)
 
 
-def bot_get_keyboard_inline(year=None, month=None, command='calendar', state=None,
-                            start_date=None) -> InlineKeyboardMarkup:
+def bot_get_keyboard_inline(year=None, month=None, command='calendar', state='None') -> InlineKeyboardMarkup:
     """
     Функция делает Inline клавиатуру-календарь
 
@@ -42,8 +43,6 @@ def bot_get_keyboard_inline(year=None, month=None, command='calendar', state=Non
     month = date.today().month if month is None else month
     year = date.today().year if year is None else year
     my_calendar = calendar.monthcalendar(year, month)
-    for_data = my_date if command == 'calendar' else for_search
-    need_date = ' ' if start_date is None else start_date
     keyboard = InlineKeyboardMarkup()
     empty_data = 'EMPTY'  # Пустая дата для месяца и дня недели
 
@@ -58,13 +57,18 @@ def bot_get_keyboard_inline(year=None, month=None, command='calendar', state=Non
             if day == 0:
                 row.append(InlineKeyboardButton(' ', callback_data=empty_data))
             else:
-                row.append(
-                    InlineKeyboardButton(day, callback_data=for_data.new(year=year, month=month, day=day, state=state,
-                                                                         start_date=need_date)))
+                for_callback = my_date.new(year=year, month=month,
+                                           day=day, ) if command == 'calendar' else for_search.new(year=year,
+                                                                                                   month=month,
+                                                                                                   day=day,
+                                                                                                   state=state)
+                row.append(InlineKeyboardButton(day, callback_data=for_callback))
         keyboard.add(*row, row_width=7)
     keyboard.add(
-        InlineKeyboardButton('<<', callback_data=calendar_factory.new(action="prev", year=year, month=month)),
-        InlineKeyboardButton('>>', callback_data=calendar_factory.new(action="next", year=year, month=month)),
+        InlineKeyboardButton('<<', callback_data=calendar_factory.new(action="prev", year=year, month=month,
+                                                                      command=command, state=state)),
+        InlineKeyboardButton('>>', callback_data=calendar_factory.new(action="next", year=year, month=month,
+                                                                      command=command, state=state)),
     )
     return keyboard
 
@@ -76,11 +80,12 @@ def callback_inline(call: CallbackQuery):
     :param call: Выбор пользователя
     """
     callback_data = calendar_factory.parse(callback_data=call.data)
-    print(callback_data)
-    action, year, month = (callback_data['action'], int(callback_data['year']), int(callback_data['month']))
+    action, year, month, command, state = (
+        callback_data['action'], int(callback_data['year']), int(callback_data['month']), callback_data['command'],
+        callback_data['state'])
     bot.edit_message_text('Месяц', call.message.chat.id, call.message.id,
                           reply_markup=get_next_or_prev_mont(action=action, year=year,
-                                                             month=month))
+                                                             month=month, command=command, state=state))
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('EMPTY'))

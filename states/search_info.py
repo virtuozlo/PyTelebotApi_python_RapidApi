@@ -11,6 +11,7 @@ class LowPriceStates(StatesGroup):
     """
     State класс для команды LowPrice
     """
+    city = State()
     cities = State()
     count_hotels = State()
     photo = State()
@@ -23,6 +24,7 @@ class HighPriceStates(StatesGroup):
     """
     State класс для команды HighPrice
     """
+    city = State()
     cities = State()
     count_hotels = State()
     photo = State()
@@ -35,6 +37,7 @@ class BestDealStates(StatesGroup):
     """
     State класс для команды BestDeal
     """
+    city = State()
     cities = State()
     count_hotels = State()
     photo = State()
