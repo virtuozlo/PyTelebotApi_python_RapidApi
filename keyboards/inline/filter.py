@@ -4,26 +4,15 @@ import telebot
 from telebot import types, AdvancedCustomFilter, SimpleCustomFilter
 from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot import types
+from telebot.custom_filters import StateFilter
 from loader import bot
 
 calendar_factory = CallbackData("action", "year", "month", prefix="calendar")
 my_date = CallbackData("year", "month", "day", prefix="my_date")
 for_search = CallbackData("year", "month", "day", "state", "start_date", prefix="search")
-for_button = CallbackData('name', 'destid', prefix='button')
+for_button = CallbackData('name', 'destid', 'state', prefix='button')
 for_count_digit = CallbackData('digit', prefix='count')
-
-
-class IsNeedPhoto(SimpleCustomFilter):
-    """
-    Нужны ли фото
-    """
-    key = 'is_photo'
-
-    def check(self, message):
-        if isinstance(message, types.CallbackQuery):
-            return message.data == 'Нужны'
-        else:
-            return message.text == 'Нужны'
+for_photo = CallbackData('photo', 'state', prefix='is_photo')
 
 
 class IsDigitNoMany(SimpleCustomFilter):
@@ -34,6 +23,17 @@ class IsDigitNoMany(SimpleCustomFilter):
 
     def check(self, message):
         return 0 < int(message.text) < 10
+
+
+class IsNeedPhoto(AdvancedCustomFilter):
+    """
+    Нужны ли фото
+    """
+    key = 'is_photo'
+
+    def check(self, call: types.CallbackQuery, config: CallbackDataFilter):
+        return config.check(query=call)
+
 
 
 class CalendarCallbackFilter(AdvancedCustomFilter):

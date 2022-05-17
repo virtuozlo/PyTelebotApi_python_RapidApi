@@ -1,8 +1,9 @@
 import json
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import requests
 from config_data.my_config import url_from_properties, headers
+from loader import db_hisory
 
 
 # @logger.catch
@@ -53,10 +54,12 @@ def get_rating(hotel: dict, user_id: int) -> Optional[int]:
 
 
 def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_order: str, locale: str, currency: str,
-                        pagesize: str, user_id: int,
-                        best_string: dict = None) -> Optional[str, dict]:
+                        pagesize: str, user_id: int, command: str, total_days: int,
+                        best_string: dict = None) -> Optional[Union[str, dict]]:
     """
     Получение отелей
+    :param total_days: Всего дней путешествия
+    :param command: Введеная команда
     :param destination_id: Ид города
     :param checkin: Дата заезда
     :param checkout: Дата выезда
@@ -81,24 +84,23 @@ def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_o
     response = requests.request("GET", url_from_properties, headers=headers, params=querystring)
     if response:
         try:
-            print(json.loads(response.text))
             data = json.loads(response.text)['data']['body']['searchResults']['results']
-            print(data)
             if data:
-                return get_normalize_str(data, user_id)
+                return get_normalize_str(data, user_id, command, total_days)
             else:
                 return 'По вашему запросу ничего не найдено. Попробуйте снова /start'
         except KeyError:
-            print(response.text)
             return 'Ошибка ответа сервера, попробуйте еще раз. /start'
     else:
         # logger.debug(response.text)
         print(response.text)
 
 
-def get_normalize_str(hotels: dict, user_id: int) -> Optional[dict, str]:
+def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int) -> Optional[Union[dict, str]]:
     """
     Вывод строки для бота
+    :param total_days:
+    :param command:
     :param hotels:
     :param user_id:
     :return:
@@ -109,7 +111,8 @@ def get_normalize_str(hotels: dict, user_id: int) -> Optional[dict, str]:
             description = f'Отель - {i_hotel["name"]}\n ' \
                           f'Адрес - {get_adress(i_hotel["address"], user_id)}\n' \
                           f'Цена за ночь - {i_hotel["ratePlan"]["price"]["current"]} \n' \
-                          f'Сайт отеля: https://ru.hotels.com/ho{i_hotel["id"]}\n'
+                          f'Сайт отеля: https://ru.hotels.com/ho{i_hotel["id"]}\n' \
+                          f'Всего стоимость за {total_days} ночи : {int(i_hotel["ratePlan"]["price"]["exactCurrent"]) * total_days}\n'
             distance = get_distance_to_centre(i_hotel['landmarks'], user_id)
             rating = get_rating(i_hotel, user_id)
             if distance:
@@ -118,6 +121,7 @@ def get_normalize_str(hotels: dict, user_id: int) -> Optional[dict, str]:
                 description += f'Рейтинг отеля: {rating}\n'
 
             normalize_str[i_hotel['id']] = description
+        db_hisory.set_data(user_id, command, normalize_str)
         return normalize_str
     else:
         return "По вашему запросу ничего не найдено. Попробуйте снова /start"

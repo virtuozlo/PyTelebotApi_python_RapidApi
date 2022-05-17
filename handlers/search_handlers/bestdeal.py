@@ -3,7 +3,7 @@ from datetime import date
 from telebot.types import InputMediaPhoto, CallbackQuery, Message
 
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
-from keyboards.inline.filter import for_button, for_search
+from keyboards.inline.filter import for_button, for_search, for_photo
 from keyboards.inline.photo_button import get_button_photo
 from loader import bot
 from states.search_info import BestDealStates
@@ -36,7 +36,7 @@ def get_cities_request(message: Message) -> None:
     """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['city'] = message.text
-        keyboard = get_dest_id(message.text, data['locale'], data['currency'])
+        keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='best_state')
         if keyboard.keyboard:
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
@@ -44,7 +44,7 @@ def get_cities_request(message: Message) -> None:
             bot.set_state(message.from_user.id, BestDealStates.cities)
 
 
-@bot.callback_query_handler(func=None, button_config=for_button.filter())
+@bot.callback_query_handler(func=None, button_config=for_button.filter(state='best_state'))
 def button_callback(call: CallbackQuery) -> None:
     """
     Обработка кнопок городов
@@ -59,26 +59,26 @@ def button_callback(call: CallbackQuery) -> None:
         bot.edit_message_text(f'Отличный выбор {name}', call.message.chat.id, call.message.id)
     bot.set_state(call.from_user.id, BestDealStates.start_date, call.message.chat.id)
     bot.send_message(call.message.chat.id, f'Выберите даты заезда',
-                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='start_date'))
+                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='dest_start_date'))
 
 
-@bot.callback_query_handler(func=None, search_config=for_search.filter(state='start_date'))
+@bot.callback_query_handler(func=None, search_config=for_search.filter(state='dest_start_date'))
 def callback_start_date(call: CallbackQuery) -> None:
     """
     :param call: Выбор пользователя начала поездки
     """
+    bot.set_state(call.from_user.id, BestDealStates.end_date, call.message.chat.id)
     data = for_search.parse(callback_data=call.data)
     my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
     bot.send_message(call.message.chat.id, 'Выберите дату уезда',
-                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='end_date',
+                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='dest_end_date',
                                                           start_date=my_exit_date))
-    bot.set_state(call.from_user.id, BestDealStates.end_date, call.message.chat.id)
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['startday'] = my_exit_date
         bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=None, search_config=for_search.filter(state='end_date'))
+@bot.callback_query_handler(func=None, search_config=for_search.filter(state='dest_end_date'))
 def callback_end_date(call: CallbackQuery) -> None:
     """
     :param call: Окончание поездки
@@ -89,6 +89,7 @@ def callback_end_date(call: CallbackQuery) -> None:
     bot.send_message(call.message.chat.id, 'Сколько отелей выводить? ( не более 10)')
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['endday'] = my_exit_date
+        data['all_days'] = data['endday'] - data['startday']
         if data['startday'] > data['endday']:
             data['startday'], data['endday'] = data['endday'], data['startday']
         bot.edit_message_text(f'Дата выезда: {my_exit_date}', call.message.chat.id, call.message.id)
@@ -103,13 +104,13 @@ def get_photo_info(message: Message) -> None:
     """
     bot.send_message(message.chat.id, f'Буду выводить {message.text} отелей')
     bot.send_message(message.chat.id, f'Нужны фото отелей?',
-                     reply_markup=get_button_photo())
+                     reply_markup=get_button_photo(state='best_state'))
     bot.set_state(message.from_user.id, BestDealStates.photo, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_hotels'] = message.text
 
 
-@bot.callback_query_handler(func=None, is_photo=False)
+@bot.callback_query_handler(func=None, is_photo=for_photo.filter(photo='False', state='best_state'))
 def not_photo(call: CallbackQuery) -> None:
     """
     :param call: Обработчик кнопки "фото не нужно"
@@ -121,7 +122,7 @@ def not_photo(call: CallbackQuery) -> None:
         data['photo'] = ''
 
 
-@bot.callback_query_handler(func=None, is_photo=True)
+@bot.callback_query_handler(func=None, is_photo=for_photo.filter(photo='True', state='best_state'))
 def get_photo_count_info(call: CallbackQuery) -> None:
     """
     Запрос количества фотографий отелей. Запись необходимости фото
@@ -222,7 +223,8 @@ def user_is_ready(message: Message) -> None:
         ex_str = get_properties_list(data['destid'], data["startday"], data["endday"], data['SortOrder'],
                                      data['locale'],
                                      data['currency'], data['count_hotels'], message.from_user.id,
-                                     best_string=addition_str)
+                                     best_string=addition_str, command='bestdeal',
+                                     total_days=abs(data['all_days'].days))
         if isinstance(ex_str, dict):
             for key, value in ex_str.items():
                 bot.send_message(message.chat.id, f'{value}')
