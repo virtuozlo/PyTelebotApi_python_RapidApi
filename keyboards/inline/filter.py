@@ -22,7 +22,7 @@ class IsDigitNoMany(SimpleCustomFilter):
     key = 'count_digit'
 
     def check(self, message):
-        return 0 < int(message.text) < 10
+        return 0 < int(message.text) <= 10
 
 
 class IsNeedPhoto(AdvancedCustomFilter):
