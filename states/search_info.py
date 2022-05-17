@@ -7,6 +7,13 @@ from telebot.storage import StateMemoryStorage
 state_storage = StateMemoryStorage()
 
 
+class HistoryStates(StatesGroup):
+    """
+    State класс для команды history
+    """
+    count = State()
+
+
 class LowPriceStates(StatesGroup):
     """
     State класс для команды LowPrice

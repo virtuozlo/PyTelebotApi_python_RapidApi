@@ -30,3 +30,15 @@ class HistoryUserDb:
             return self.cursor.execute('''
             INSERT INTO UserHistory(`userId`,`command`,`data`)
             VALUES (?,?,?)''', (user_id, command, json.dumps(data)))
+
+    def get_data(self, user_id: int, count: int) -> sqlite3.connect('history_user.db').cursor():
+        """
+        Достать из БД историю
+        :param user_id:
+        :param count:
+        :return:
+        """
+        with self.connection:
+            return self.cursor.execute('''
+            SELECT `search_date`,`command`,`data` FROM UserHistory
+            WHERE `userId` = ? LIMIT ?''', (user_id, count))
