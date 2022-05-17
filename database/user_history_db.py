@@ -3,12 +3,20 @@ import json
 
 
 class HistoryUserDb:
+    """
+    Пользовательский класс базу данных для работы с пользователем и его историей поиска
+    """
+
     def __init__(self, db_file):
         self.connection = sqlite3.connect(db_file, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.set_up_table()
 
     def set_up_table(self):
+        """
+        Устанавливает таблицу в БД если их нет
+        :return:
+        """
         with self.connection:
             return self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS UserHistory(
@@ -23,7 +31,7 @@ class HistoryUserDb:
         Запись в БД пользователя, введенной команды и словаря отелей
         :param user_id: идентификатор пользователя
         :param command: команда поиска отелей
-        :param data:
+        :param data: Словарь отелей
         :return:
         """
         with self.connection:
@@ -34,8 +42,8 @@ class HistoryUserDb:
     def get_data(self, user_id: int, count: int) -> sqlite3.connect('history_user.db').cursor():
         """
         Достать из БД историю
-        :param user_id:
-        :param count:
+        :param user_id:Идентификатор пользователя
+        :param count:Количество отелей
         :return:
         """
         with self.connection:

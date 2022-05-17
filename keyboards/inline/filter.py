@@ -1,13 +1,9 @@
-from datetime import date
-
 import telebot
-from telebot import types, AdvancedCustomFilter, SimpleCustomFilter
+from telebot import AdvancedCustomFilter, SimpleCustomFilter
 from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot import types
-from telebot.custom_filters import StateFilter
-from loader import bot
 
-calendar_factory = CallbackData("action", "year", "month","command","state", prefix="calendar")
+calendar_factory = CallbackData("action", "year", "month", "command", "state", prefix="calendar")
 my_date = CallbackData("year", "month", "day", prefix="my_date")
 for_search = CallbackData("year", "month", "day", "state", prefix="search")
 for_button = CallbackData('name', 'destid', 'state', prefix='button')
@@ -33,7 +29,6 @@ class IsNeedPhoto(AdvancedCustomFilter):
 
     def check(self, call: types.CallbackQuery, config: CallbackDataFilter):
         return config.check(query=call)
-
 
 
 class CalendarCallbackFilter(AdvancedCustomFilter):
@@ -77,10 +72,11 @@ class ButtonCitiCallbackFilter(AdvancedCustomFilter):
 
 
 def bind_filters(bot: telebot.TeleBot):
+    bot.add_custom_filter(telebot.custom_filters.StateFilter(bot))
+    bot.add_custom_filter(telebot.custom_filters.IsDigitFilter())
     bot.add_custom_filter(CalendarCallbackFilter())
     bot.add_custom_filter(CalendarGetDateCallbackFilter())
     bot.add_custom_filter(CalendarGetDateSearchCallbackFilter())
     bot.add_custom_filter(ButtonCitiCallbackFilter())
     bot.add_custom_filter(IsDigitNoMany())
     bot.add_custom_filter(IsNeedPhoto())
-    bot.add_custom_filter(telebot.custom_filters.IsDigitFilter())

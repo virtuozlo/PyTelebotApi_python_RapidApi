@@ -5,9 +5,11 @@ from loader import bot
 from keyboards.inline.filter import calendar_factory, my_date, for_search
 
 
-def get_next_or_prev_mont(action, year, month, command=None, state=None):
+def get_next_or_prev_mont(action: str, year: int, month: int, command=None, state=None) -> InlineKeyboardMarkup:
     """
     Функция корректирует год и месяц если пользователь нажал на стрелочки выбора месяца
+    :param state: На случай перелистывания календаря с основных команд
+    :param command: На случай перелистывания календаря с основных команд
     :param action: След или предыдущий месяц
     :param year: год с коллбэка
     :param month: месяц оттуда же
@@ -33,7 +35,7 @@ def get_next_or_prev_mont(action, year, month, command=None, state=None):
 def bot_get_keyboard_inline(year=None, month=None, command='calendar', state='None') -> InlineKeyboardMarkup:
     """
     Функция делает Inline клавиатуру-календарь
-
+    :param state: На случай перелистывания календаря с основных команд
     :param command: Для формирования коллбэкДаты
     :param year: Текущий год, если не задано иное
     :param month: Текущий месяц, если не задано иное

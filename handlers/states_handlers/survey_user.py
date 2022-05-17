@@ -1,9 +1,10 @@
 from states.survey_user_states import MyStates
 from loader import bot, db_user
+from telebot.types import Message
 
 
 @bot.message_handler(commands=['survey'])
-def start_ex(message):
+def start_ex(message: Message) -> None:
     """
     Команда старт. Присваивается этап 'name'
     """
@@ -16,7 +17,7 @@ def start_ex(message):
 
 
 @bot.message_handler(state=MyStates.name)
-def name_get(message):
+def name_get(message: Message) -> None:
     """
     1 этап. Запуск метода когда у пользователя state=name
     """
@@ -27,7 +28,7 @@ def name_get(message):
 
 
 @bot.message_handler(state=MyStates.surname)
-def ask_age(message):
+def ask_age(message: Message) -> None:
     """
     Этап 2. Запуск метода когда у пользователя state=surname.
     """
@@ -38,7 +39,7 @@ def ask_age(message):
 
 
 @bot.message_handler(state=MyStates.age, is_digit=True)
-def ready_for_answer(message):
+def ready_for_answer(message: Message) -> None:
     """
     Этап 3. Запуск метода когда у пользователя state=age.Идет проверка на ввод числа
     """
@@ -52,7 +53,7 @@ def ready_for_answer(message):
 
 
 @bot.message_handler(state=MyStates.age, is_digit=False)
-def age_incorrect(message):
+def age_incorrect(message: Message) -> None:
     """
     Если при вводе возраста ввели не число
     """

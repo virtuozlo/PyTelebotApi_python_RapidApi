@@ -2,7 +2,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from keyboards.inline.filter import for_photo
 
 
-def get_button_photo(state: str):
+def get_button_photo(state: str) -> InlineKeyboardMarkup:
     """
     Делает две кнопки для необходимости фото
     :return: клавиатура

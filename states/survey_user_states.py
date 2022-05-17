@@ -1,5 +1,3 @@
-from loader import bot
-from telebot import custom_filters
 from telebot.handler_backends import State, StatesGroup  # States
 
 # States storage
@@ -16,7 +14,3 @@ class MyStates(StatesGroup):
     name = State()  # creating instances of State class is enough from now
     surname = State()
     age = State()
-
-
-bot.add_custom_filter(custom_filters.StateFilter(bot))
-bot.add_custom_filter(custom_filters.IsDigitFilter())
