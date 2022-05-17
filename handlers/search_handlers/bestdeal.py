@@ -71,8 +71,7 @@ def callback_start_date(call: CallbackQuery) -> None:
     data = for_search.parse(callback_data=call.data)
     my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
     bot.send_message(call.message.chat.id, 'Выберите дату уезда',
-                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='dest_end_date',
-                                                          start_date=my_exit_date))
+                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='dest_end_date'))
     with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
         data['startday'] = my_exit_date
         bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)

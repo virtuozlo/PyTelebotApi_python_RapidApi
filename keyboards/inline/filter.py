@@ -7,9 +7,9 @@ from telebot import types
 from telebot.custom_filters import StateFilter
 from loader import bot
 
-calendar_factory = CallbackData("action", "year", "month", prefix="calendar")
+calendar_factory = CallbackData("action", "year", "month","command","state", prefix="calendar")
 my_date = CallbackData("year", "month", "day", prefix="my_date")
-for_search = CallbackData("year", "month", "day", "state", "start_date", prefix="search")
+for_search = CallbackData("year", "month", "day", "state", prefix="search")
 for_button = CallbackData('name', 'destid', 'state', prefix='button')
 for_count_digit = CallbackData('digit', prefix='count')
 for_photo = CallbackData('photo', 'state', prefix='is_photo')

@@ -112,7 +112,7 @@ def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int)
                           f'Адрес - {get_adress(i_hotel["address"], user_id)}\n' \
                           f'Цена за ночь - {i_hotel["ratePlan"]["price"]["current"]} \n' \
                           f'Сайт отеля: https://ru.hotels.com/ho{i_hotel["id"]}\n' \
-                          f'Всего стоимость за {total_days} ночи : {int(i_hotel["ratePlan"]["price"]["exactCurrent"]) * total_days}\n'
+                          f'Всего стоимость за {total_days} ночи : {int(i_hotel["ratePlan"]["price"]["exactCurrent"]) * total_days}$\n'
             distance = get_distance_to_centre(i_hotel['landmarks'], user_id)
             rating = get_rating(i_hotel, user_id)
             if distance:
