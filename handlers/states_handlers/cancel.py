@@ -1,8 +1,7 @@
-# from keyboards.reply.cancel_states import cancel_states
 from loader import bot
 
 
-@bot.message_handler(state="*", commands='отмена')
+@bot.message_handler(state="*", commands=['отмена', 'Отмена', 'ОТМЕНА'])
 def any_state(message):
     """
     Отмена этапов
