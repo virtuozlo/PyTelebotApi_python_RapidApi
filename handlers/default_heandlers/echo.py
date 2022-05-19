@@ -1,6 +1,8 @@
+import logging
+
 from telebot.types import Message
 
-from loader import bot
+from loader import bot,logger
 
 
 # Эхо хендлер, куда летят текстовые сообщения без указанного состояния
