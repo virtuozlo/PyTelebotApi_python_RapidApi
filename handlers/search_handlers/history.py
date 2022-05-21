@@ -2,7 +2,8 @@ from telebot.types import Message
 import json
 from states.search_info import HistoryStates
 
-from loader import db_hisory, bot,logger
+from loader import db_hisory, bot
+from utils.logger import logger
 
 
 @bot.message_handler(commands=['history'])
@@ -20,14 +21,21 @@ def get_history(message: Message) -> None:
     '''
     Вывод истории поиска
     '''
-    logger.info(f'user_id: {message.from_user.id}')
+    logger.info(f'user_id: {message.from_user.id} {message.text}')
     data = db_hisory.get_data(message.from_user.id, message.text)
-    for row in data.fetchall():
-        data, command, hotels = row[0], row[1], json.loads(row[2])
-        bot.send_message(message.chat.id, f'{data} выполнили команду {command} и нашли: ')
-        for _ in range(len(hotels)):
-            for id, description in hotels.items():
-                bot.send_message(message.chat.id, f'{description}')
+    rows = data.fetchall()
+    if rows:
+        logger.info(f'user id: {message.from_user.id}')
+        for row in rows:
+            data, command, hotels = row[0], row[1], json.loads(row[2])
+            bot.send_message(message.chat.id, f'{data} выполнили команду {command} и нашли: ')
+            for _ in range(len(hotels)):
+                for id, description in hotels.items():
+                    bot.send_message(message.chat.id, f'{description}')
+    else:
+        logger.error(f'user id: {message.from_user.id}')
+        bot.delete_state(message.from_user.id, message.chat.id)
+        bot.send_message(message.chat.id, 'Ваша история пуста. Можете начать её! /start')
 
 
 @bot.message_handler(state=HistoryStates.count, is_digit=False)

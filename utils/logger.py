@@ -1,3 +1,5 @@
+import logging.config
+
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -28,7 +30,7 @@ LOGGING_CONFIG = {
         }
     },
     'loggers': {
-        'root': {  # root logger
+        '': {  # root logger
             'handlers': ['console', 'file_info', 'file_error'],
             'level': 'DEBUG',
             'propagate': False
@@ -45,3 +47,5 @@ LOGGING_CONFIG = {
         },
     }
 }
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger('loader')

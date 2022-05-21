@@ -8,6 +8,8 @@ from telebot.types import InlineKeyboardMarkup
 
 from config_data.my_config import url_from_cities, headers
 from keyboards.inline.button_citi import get_button_cities
+from utils.logger import logger
+
 
 
 def get_dest_id(city: str, locale: str, currency: str, state: str) -> Optional[Union[str, InlineKeyboardMarkup]]:
@@ -18,15 +20,18 @@ def get_dest_id(city: str, locale: str, currency: str, state: str) -> Optional[U
     :param currency: валюта от локали
     :return: keyboard or None
     """
+    logger.info()
     querystring = {"query": city,
                    "locale": locale,
                    "currency": currency}
     response = requests.request("GET", url_from_cities, headers=headers, params=querystring)
     if response:
+        logger.info('response')
         data = json.loads(response.text)
         entries = list(filter(lambda i_data: i_data['group'] == 'CITY_GROUP', data['suggestions']))[0]['entities']
         if not entries:
-            return None
+            logger.error('Нет подходящих вариантов по вашему запросу')
+            return 'Нет подходящих вариантов по вашему запросу'
         else:
             temp_dict_button_hotel = {}
             for i_hotel in entries:
@@ -37,5 +42,5 @@ def get_dest_id(city: str, locale: str, currency: str, state: str) -> Optional[U
                     temp_dict_button_hotel[current_city] = call_dat
             return get_button_cities(temp_dict_button_hotel, state)
     else:
-        # logger.info('Not response')
-        return None
+        logger.error('Not response')
+        return 'Not response'

@@ -5,7 +5,8 @@ from telebot.types import InputMediaPhoto, CallbackQuery, Message
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
 from keyboards.inline.filter import for_button, for_search, for_photo
 from keyboards.inline.photo_button import get_button_photo
-from loader import bot, logger
+from loader import bot
+from utils.logger import logger
 from states.search_info import BestDealStates
 from utils.requests_rapidApi.get_id_search import get_dest_id
 from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
@@ -41,7 +42,7 @@ def get_cities_request(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['city'] = message.text
         keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='best_state')
-        if keyboard.keyboard:
+        if not isinstance(keyboard, str):
             logger.info(f'user_id {message.from_user.id} {message.text}')
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
