@@ -7,7 +7,7 @@ if not find_dotenv():
     logger.error()
     exit('Переменные окружения не загружены т.к отсутствует файл .env')
 else:
-    logger.info(' ')
+    logger.info(f'{logger.name}')
     load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')

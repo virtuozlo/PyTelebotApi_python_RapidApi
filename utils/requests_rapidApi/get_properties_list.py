@@ -69,7 +69,7 @@ def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_o
     :param best_string: доп. querystring
     :return: 
     """
-    logger.info()
+    logger.info(' ')
     querystring = {"destinationId": destination_id,
                    "pageSize": pagesize,
                    "checkIn": checkin,
@@ -107,7 +107,7 @@ def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int)
     :param user_id:
     :return:
     """
-    logger.info()
+    logger.info(' ')
     if hotels:
         normalize_str = {}
         for num, i_hotel in enumerate(hotels):
@@ -125,7 +125,7 @@ def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int)
 
             normalize_str[i_hotel['id']] = description
         db_hisory.set_data(user_id, command, normalize_str)
-        logger.info()
+        logger.info(' ')
         return normalize_str
     else:
         logger.error('Not hotels')

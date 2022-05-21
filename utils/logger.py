@@ -1,4 +1,5 @@
 import logging.config
+import traceback
 
 LOGGING_CONFIG = {
     'version': 1,
@@ -37,7 +38,7 @@ LOGGING_CONFIG = {
         },
         'loader': {
             'handlers': ['console', 'file_info', 'file_error'],
-            # 'level': 'INFO',
+            'level': 'INFO',
             'propagate': False
         },
         '__main__': {  # if __name__ == '__main__'
@@ -48,4 +49,5 @@ LOGGING_CONFIG = {
     }
 }
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('loader')
+logger = logging.getLogger(__name__)
+# logger = logging.getLogger('loader')

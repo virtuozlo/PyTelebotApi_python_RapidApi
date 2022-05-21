@@ -1,9 +1,20 @@
+import logging
+
 from telebot.types import Message
 import json
+
+from keyboards.inline.filter import for_start
 from states.search_info import HistoryStates
 
 from loader import db_hisory, bot
 from utils.logger import logger
+
+
+@bot.callback_query_handler(func=None, start_config=for_start.filter(action='history'))
+def start_history(call):
+    logger.info(' ')
+    bot.set_state(call.from_user.id, HistoryStates.count, call.message.chat.id)
+    bot.send_message(call.message.chat.id, 'Сколько последних запросов Вам показать?(Не более 10)')
 
 
 @bot.message_handler(commands=['history'])
@@ -44,7 +55,7 @@ def bad_digit(message: Message) -> None:
     :param message: не число
     """
     logger.error(f'user_id: {message.from_user.id}')
-    bot.send_message(message.chat.id, 'Введите число')
+    bot.send_message(message.chat.id, 'Введите число больше 0')
 
 
 @bot.message_handler(state=HistoryStates.count, is_digit=True, count_digit=False)

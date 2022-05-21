@@ -12,7 +12,7 @@ def get_button_cities(dict_buttons: dict, state: str) -> Optional[Union[str, Inl
     :param dict_buttons: словарь. ключ-название города значение-Destid
     :return: InlineKeyboardMarkup
     """
-    logger.info()
+    logger.info(' ')
     if not dict_buttons:
         logger.error()
         return 'Не нашел подходящего города'

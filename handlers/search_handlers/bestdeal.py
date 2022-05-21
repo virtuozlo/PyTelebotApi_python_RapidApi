@@ -3,7 +3,7 @@ from datetime import date
 from telebot.types import InputMediaPhoto, CallbackQuery, Message
 
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
-from keyboards.inline.filter import for_button, for_search, for_photo
+from keyboards.inline.filter import for_button, for_search, for_photo, for_start
 from keyboards.inline.photo_button import get_button_photo
 from loader import bot
 from utils.logger import logger
@@ -11,6 +11,18 @@ from states.search_info import BestDealStates
 from utils.requests_rapidApi.get_id_search import get_dest_id
 from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
 from utils.requests_rapidApi.get_properties_list import get_properties_list
+
+
+@bot.callback_query_handler(func=None, start_config=for_start.filter(action='highprice'))
+def start_highprice(call):
+    """
+    Выбор возрастания цены
+    :param call:
+    :return:
+    """
+    logger.info(' ')
+    bot.set_state(call.from_user.id, BestDealStates.cities,call.message.chat.id)
+    bot.send_message(call.message.chat.id, 'Отлично! Выбран дополнительный критерий поиска. Выберите город для поиска.')
 
 
 @bot.message_handler(commands=['bestdeal'])
@@ -21,13 +33,6 @@ def start_best_deal(message: Message) -> None:
     """
     logger.info(f'user_id {message.from_user.id}')
     bot.set_state(message.from_user.id, BestDealStates.cities, message.chat.id)
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['id'] = message.from_user.id
-        data['SortOrder'] = 'STAR_RATING_HIGHEST_FIRST'
-        data['locale'] = 'ru_RU'
-        data['currency'] = 'USD'
-        logger.info(f'user_id {message.from_user.id}')
-
     bot.send_message(message.chat.id, 'Отлично! Выбран дополнительный критерий поиска. Выберите город для поиска.')
 
 
@@ -40,6 +45,10 @@ def get_cities_request(message: Message) -> None:
     """
     logger.info(f'user_id {message.from_user.id}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['id'] = message.from_user.id
+        data['SortOrder'] = 'STAR_RATING_HIGHEST_FIRST'
+        data['locale'] = 'ru_RU'
+        data['currency'] = 'USD'
         data['city'] = message.text
         keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='best_state')
         if not isinstance(keyboard, str):
@@ -225,7 +234,7 @@ def not_digit_message(message: Message) -> None:
     :return: None
     """
     logger.error(f'user_id {message.from_user.id}')
-    bot.send_message(message.chat.id, 'Введите число!')
+    bot.send_message(message.chat.id, 'Введите число больше 0!')
 
 
 @bot.message_handler(state=BestDealStates.count_hotels, is_digit=True, count_digit=False)

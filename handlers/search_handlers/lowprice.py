@@ -5,12 +5,25 @@ from utils.logger import logger
 
 from loader import bot
 from states.search_info import LowPriceStates
-from keyboards.inline.filter import for_search, for_button, for_photo
+from keyboards.inline.filter import for_search, for_button, for_photo, for_start
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
 from keyboards.inline.photo_button import get_button_photo
 from utils.requests_rapidApi.get_properties_list import get_properties_list
 from utils.requests_rapidApi.get_id_search import get_dest_id
 from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
+
+
+@bot.callback_query_handler(func=None, start_config=for_start.filter(action='highprice'))
+def start_highprice(call):
+    """
+    Выбор возрастания цены
+    :param call:
+    :return:
+    """
+    logger.info(' ')
+    bot.set_state(call.from_user.id, LowPriceStates.cities,call.message.chat.id)
+    bot.send_message(call.message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите город для поиска.')
+
 
 
 @bot.message_handler(commands=['lowprice'])
@@ -20,12 +33,6 @@ def start_lowprice(message: Message) -> None:
     """
     logger.info(f'user_id {message.from_user.id}')
     bot.set_state(message.from_user.id, LowPriceStates.cities, message.chat.id)
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['id'] = message.from_user.id
-        data['SortOrder'] = 'PRICE'
-        data['locale'] = 'ru_RU'
-        data['currency'] = 'USD'
-        logger.info(f'user_id {message.from_user.id}')
     bot.send_message(message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите город для поиска.')
 
 
@@ -36,7 +43,12 @@ def get_cities_request(message: Message) -> None:
     """
     logger.info(f'user_id {message.from_user.id}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['id'] = message.from_user.id
+        data['SortOrder'] = 'PRICE'
+        data['locale'] = 'ru_RU'
+        data['currency'] = 'USD'
         data['city'] = message.text
+        logger.info(f'user_id {message.from_user.id}')
         keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='low_city')
         if keyboard.keyboard:
             logger.info(f'user_id {message.from_user.id} {message.text}')
