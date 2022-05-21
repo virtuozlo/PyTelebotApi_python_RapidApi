@@ -1,5 +1,7 @@
 from states.survey_user_states import MyStates
 from loader import bot, db_user
+from utils.logger import logger
+
 from telebot.types import Message
 
 
@@ -8,8 +10,10 @@ def start_ex(message: Message) -> None:
     """
     Команда старт. Присваивается этап 'name'
     """
+    logger.info(f'user_id: {message.from_user.id}')
     if not db_user.check_user(message.from_user.id):
         db_user.add_user(message.from_user.id)
+        logger.error(f'user_id: {message.from_user.id}')
     bot.set_state(message.from_user.id, MyStates.name, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['id'] = message.from_user.id
@@ -21,6 +25,7 @@ def name_get(message: Message) -> None:
     """
     1 этап. Запуск метода когда у пользователя state=name
     """
+    logger.info(f'user_id: {message.from_user.id}')
     bot.send_message(message.chat.id, f'Теперь напиши свою фамилию')
     bot.set_state(message.from_user.id, MyStates.surname, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -32,6 +37,7 @@ def ask_age(message: Message) -> None:
     """
     Этап 2. Запуск метода когда у пользователя state=surname.
     """
+    logger.info(f'user_id: {message.from_user.id}')
     bot.send_message(message.chat.id, "Сколько тебе лет?")
     bot.set_state(message.from_user.id, MyStates.age, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -43,6 +49,7 @@ def ready_for_answer(message: Message) -> None:
     """
     Этап 3. Запуск метода когда у пользователя state=age.Идет проверка на ввод числа
     """
+    logger.info(f'user_id: {message.from_user.id}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['age'] = int(message.text)
         bot.send_message(message.chat.id,
@@ -57,4 +64,5 @@ def age_incorrect(message: Message) -> None:
     """
     Если при вводе возраста ввели не число
     """
+    logger.error(f'user_id: {message.from_user.id}')
     bot.send_message(message.chat.id, 'Ты ввел не цифру, а строку! Пожалуйста, введи свой возраст в цифрах!')

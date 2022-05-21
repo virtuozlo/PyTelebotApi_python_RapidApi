@@ -1,6 +1,8 @@
 import sqlite3
 import json
 
+from utils.logger import logger
+
 
 class HistoryUserDb:
     """
@@ -17,6 +19,7 @@ class HistoryUserDb:
         Устанавливает таблицу в БД если их нет
         :return:
         """
+        logger.info(' ')
         with self.connection:
             return self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS UserHistory(
@@ -34,6 +37,7 @@ class HistoryUserDb:
         :param data: Словарь отелей
         :return:
         """
+        logger.info(' ')
         with self.connection:
             return self.cursor.execute('''
             INSERT INTO UserHistory(`userId`,`command`,`data`)
@@ -46,6 +50,7 @@ class HistoryUserDb:
         :param count:Количество отелей
         :return:
         """
+        logger.info(' ')
         with self.connection:
             return self.cursor.execute('''
             SELECT `search_date`,`command`,`data` FROM UserHistory

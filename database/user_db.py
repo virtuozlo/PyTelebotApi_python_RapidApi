@@ -1,5 +1,7 @@
 import sqlite3
 
+from utils.logger import logger
+
 
 class UserDb:
     def __init__(self, db_file):
@@ -11,6 +13,7 @@ class UserDb:
         """
         :return: Создание базы данных
         """
+        logger.info(' ')
         with self.connection:
             return self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS User(
@@ -25,6 +28,7 @@ class UserDb:
         :param user_id: идентификатор пользователя
         :return: Наличие/отсутствие пользователя
         """
+        logger.info(' ')
         with self.connection:
             result = self.cursor.execute('SELECT `userId` FROM User WHERE `userId` = ?', (user_id,)).fetchall()
             return bool(len(result))
@@ -34,6 +38,7 @@ class UserDb:
         :param user_id: Идентификатор пользователя
         :return: Добавить пользователя  БД
         """
+        logger.info(' ')
         with self.connection:
             return self.cursor.execute('INSERT INTO User(UserId) VALUES (?)', (user_id,))
 
@@ -43,6 +48,7 @@ class UserDb:
         :param data: State telebot
         :return:
         """
+        logger.info(' ')
         with self.connection:
             self.cursor.execute('UPDATE User SET fname=?,lname=?,AGE=? WHERE userID=?',
                                 (data['name'], data['surname'], data['age'], data['id']))

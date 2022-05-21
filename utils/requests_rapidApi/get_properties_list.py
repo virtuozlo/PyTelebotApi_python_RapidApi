@@ -4,9 +4,9 @@ from typing import List, Optional, Union
 import requests
 from config_data.my_config import url_from_properties, headers
 from loader import db_hisory
+from utils.logger import logger
 
 
-# @logger.catch
 def get_distance_to_centre(landmarks: List[dict], user_id: int) -> Optional[str]:
     """
     Функция проверки наличия в словаре дистанции до центра
@@ -14,16 +14,15 @@ def get_distance_to_centre(landmarks: List[dict], user_id: int) -> Optional[str]
     :param landmarks: Список со словарём, где могут быть расстояние до центра города/достопримечательности
     :return: str Расстояние. Либо None
     """
-    # logger.info(f'{user_id} Вызвана функция get_distance_to_centre(propert)')
+    logger.info(f'{user_id} Вызвана функция get_distance_to_centre(propert)')
     for i in landmarks:
         if i['label'] == 'Центр города' or i['label'] == 'City center':
             return i['distance']
         else:
-            # logger.debug(KeyError)
+            logger.error(KeyError)
             return None
 
 
-# @logger.catch
 def get_adress(adress: dict, user_id: int) -> str:
     """
     Функция проверки наличия адреса отеля.
@@ -31,13 +30,12 @@ def get_adress(adress: dict, user_id: int) -> str:
     :param adress: dict
     :return: str Адрес
     """
-    # logger.info(f'{user_id} Вызвана функция get_adress(propert)')
+    logger.info(f'{user_id} Вызвана функция get_adress(propert)')
     if 'streetAddress' in adress:
         return adress['streetAddress']
     return adress['locality']
 
 
-# @logger.catch()
 def get_rating(hotel: dict, user_id: int) -> Optional[int]:
     """
     Функция проверки наличия рейтинга отеля
@@ -45,11 +43,11 @@ def get_rating(hotel: dict, user_id: int) -> Optional[int]:
     :param hotel: dict
     :return: int/None
     """
-    # logger.info(f'{user_id} Вызвана функция get_rating(propert)')
+    logger.info(f'{user_id} Вызвана функция get_rating(propert)')
     if 'starRating' in hotel:
         return hotel['starRating']
     else:
-        # logger.debug(KeyError)
+        logger.error(KeyError)
         return None
 
 
@@ -71,6 +69,7 @@ def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_o
     :param best_string: доп. querystring
     :return: 
     """
+    logger.info(' ')
     querystring = {"destinationId": destination_id,
                    "pageSize": pagesize,
                    "checkIn": checkin,
@@ -79,21 +78,24 @@ def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_o
                    "locale": locale,
                    "currency": currency}
     if best_string:
+        logger.info('BestDeal')
         querystring.update(best_string)
 
     response = requests.request("GET", url_from_properties, headers=headers, params=querystring)
     if response:
+        logger.info('response')
         try:
             data = json.loads(response.text)['data']['body']['searchResults']['results']
             if data:
                 return get_normalize_str(data, user_id, command, total_days)
             else:
+                logger.error('Not response')
                 return 'По вашему запросу ничего не найдено. Попробуйте снова /start'
-        except KeyError:
+        except KeyError as a:
+            logger.error(f'{a}')
             return 'Ошибка ответа сервера, попробуйте еще раз. /start'
     else:
-        # logger.debug(response.text)
-        print(response.text)
+        logger.error(response.text)
 
 
 def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int) -> Optional[Union[dict, str]]:
@@ -105,6 +107,7 @@ def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int)
     :param user_id:
     :return:
     """
+    logger.info(' ')
     if hotels:
         normalize_str = {}
         for num, i_hotel in enumerate(hotels):
@@ -122,6 +125,8 @@ def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int)
 
             normalize_str[i_hotel['id']] = description
         db_hisory.set_data(user_id, command, normalize_str)
+        logger.info(' ')
         return normalize_str
     else:
+        logger.error('Not hotels')
         return "По вашему запросу ничего не найдено. Попробуйте снова /start"

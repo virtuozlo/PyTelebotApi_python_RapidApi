@@ -8,3 +8,4 @@ storage = StateMemoryStorage()
 bot = TeleBot(token=my_config.BOT_TOKEN, state_storage=storage)
 db_user = UserDb('user.db')
 db_hisory = HistoryUserDb('history_user.db')
+
