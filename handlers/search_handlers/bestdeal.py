@@ -13,7 +13,7 @@ from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
 from utils.requests_rapidApi.get_properties_list import get_properties_list
 
 
-@bot.callback_query_handler(func=None, start_config=for_start.filter(action='highprice'))
+@bot.callback_query_handler(func=None, start_config=for_start.filter(action='bestdeal'))
 def start_highprice(call):
     """
     Выбор возрастания цены

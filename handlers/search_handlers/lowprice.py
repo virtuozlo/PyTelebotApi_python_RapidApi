@@ -13,7 +13,7 @@ from utils.requests_rapidApi.get_id_search import get_dest_id
 from utils.requests_rapidApi.get_photo_hotel import get_photo_hotel
 
 
-@bot.callback_query_handler(func=None, start_config=for_start.filter(action='highprice'))
+@bot.callback_query_handler(func=None, start_config=for_start.filter(action='lowprice'))
 def start_highprice(call):
     """
     Выбор возрастания цены
@@ -158,6 +158,7 @@ def get_photo_info(message: Message) -> None:
     logger.info(f'user_id {message.from_user.id, message.text}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_photo'] = message.text
+        bot.send_message(message.chat.id,'Вывожу отели...')
     user_is_ready(message)
 
 

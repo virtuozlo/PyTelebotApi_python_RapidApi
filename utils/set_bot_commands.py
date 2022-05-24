@@ -9,6 +9,9 @@ def set_default_commands(bot: telebot) -> None:
     Команды бота
     """
     logger.info(' ')
-    bot.set_my_commands(
-        [BotCommand(*i) for i in DEFAULT_COMMANDS]
-    )
+    try:
+        bot.set_my_commands(
+            [BotCommand(*i) for i in DEFAULT_COMMANDS]
+        )
+    except BaseException as e:
+        logger.exception(e)
