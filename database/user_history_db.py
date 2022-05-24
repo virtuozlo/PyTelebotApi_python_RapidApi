@@ -40,7 +40,7 @@ class HistoryUserDb:
         logger.info(' ')
         with self.connection:
             return self.cursor.execute('''
-            INSERT INTO UserHistory(`userId`,`command`,`data`)
+            INSERT INTO UserHistory(`userID`,`command`,`data`)
             VALUES (?,?,?)''', (user_id, command, json.dumps(data)))
 
     def get_data(self, user_id: int, count: int) -> sqlite3.connect('history_user.db').cursor():
@@ -54,4 +54,15 @@ class HistoryUserDb:
         with self.connection:
             return self.cursor.execute('''
             SELECT `search_date`,`command`,`data` FROM UserHistory
-            WHERE `userId` = ? LIMIT ?''', (user_id, count))
+            WHERE `userID` = ? LIMIT ?''', (user_id, count))
+
+    def del_data(self, user_id: int) -> sqlite3.connect('history_user.db'):
+        """
+        Стереть историю
+        :param user_id: Идентификатор пользователя
+        :return:
+        """
+        logger.info(' ')
+        with self.connection:
+            return self.cursor.execute('''
+            DELETE FROM UserHistory WHERE `userID` = ? ''', (user_id,))

@@ -10,6 +10,17 @@ for_button = CallbackData('name', 'destid', 'state', prefix='button')
 for_count_digit = CallbackData('digit', prefix='count')
 for_photo = CallbackData('photo', 'state', prefix='is_photo')
 for_start = CallbackData('action', prefix='start')
+for_history = CallbackData('clean', prefix='history')
+
+
+class CleanHistory(AdvancedCustomFilter):
+    """
+    Разбирает выбор пользователя на команду старт
+    """
+    key = 'history_config'
+
+    def check(self, call: types.CallbackQuery, config: CallbackDataFilter):
+        return config.check(query=call)
 
 
 class StartActions(AdvancedCustomFilter):
@@ -92,3 +103,4 @@ def bind_filters(bot: telebot.TeleBot):
     bot.add_custom_filter(IsDigitNoMany())
     bot.add_custom_filter(IsNeedPhoto())
     bot.add_custom_filter(StartActions())
+    bot.add_custom_filter(CleanHistory())

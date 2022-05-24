@@ -1,20 +1,31 @@
 import logging
 
-from telebot.types import Message
+from telebot.types import Message,CallbackQuery
 import json
 
-from keyboards.inline.filter import for_start
+from keyboards.inline.filter import for_start, for_history
 from states.search_info import HistoryStates
-
+from keyboards.inline.clean_history import get_clean_button
 from loader import db_hisory, bot
 from utils.logger import logger
 
 
 @bot.callback_query_handler(func=None, start_config=for_start.filter(action='history'))
-def start_history(call):
+def start_history(call:CallbackQuery)->None:
     logger.info(' ')
     bot.set_state(call.from_user.id, HistoryStates.count, call.message.chat.id)
-    bot.send_message(call.message.chat.id, 'Сколько последних запросов Вам показать?(Не более 10)')
+    bot.send_message(call.message.chat.id, 'Сколько последних запросов Вам показать?(Не более 10)',
+                     reply_markup=get_clean_button())
+
+
+@bot.callback_query_handler(func=None, history_config=for_history.filter(clean='Очистить'))
+def clean_history(call:CallbackQuery)->None:
+    """
+    Коллбэк очистки истории
+    """
+    logger.info(' ')
+    db_hisory.del_data(call.from_user.id)
+    bot.send_message(call.message.chat.id, 'История очищена')
 
 
 @bot.message_handler(commands=['history'])
@@ -23,7 +34,8 @@ def start_history(message: Message) -> None:
     Начало истории
     """
     logger.info(f'user_id: {message.from_user.id}')
-    bot.send_message(message.chat.id, 'Сколько последних запросов Вам показать?(Не более 10)')
+    bot.send_message(message.chat.id, 'Сколько последних запросов Вам показать?(Не более 10)',
+                     reply_markup=get_clean_button())
     bot.set_state(message.from_user.id, HistoryStates.count, message.chat.id)
 
 
