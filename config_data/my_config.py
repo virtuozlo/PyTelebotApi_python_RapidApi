@@ -15,9 +15,7 @@ RAPID_API_KEY = os.getenv('RAPID_API_KEY')
 DEFAULT_COMMANDS = (
     ('start', "Запустить бота"),
     ('help', "Вывести справку"),
-    ('calendar', "Запустить календарь"),
     ('lowprice', 'Поиск бюджетных отелей'),
-    ('survey', 'Запустить опрос пользователя'),
     ('highprice', 'Поиск лучших отелей'),
     ('bestdeal', 'Настройка поиска'),
     ('history', 'История поиска')
