@@ -9,7 +9,10 @@ def get_button_photo(state: str) -> InlineKeyboardMarkup:
     :return: клавиатура
     """
     keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton('Фото нужны', callback_data=for_photo.new(photo='True', state=state)),
-                 InlineKeyboardButton('Фото не нужны', callback_data=for_photo.new(photo='False', state=state)))
-    logger.info(' ')
+    try:
+        keyboard.add(InlineKeyboardButton('Фото нужны', callback_data=for_photo.new(photo='True', state=state)),
+                     InlineKeyboardButton('Фото не нужны', callback_data=for_photo.new(photo='False', state=state)))
+        logger.info(' ')
+    except ValueError:
+        logger.exception()
     return keyboard

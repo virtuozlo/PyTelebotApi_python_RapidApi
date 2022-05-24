@@ -49,5 +49,4 @@ LOGGING_CONFIG = {
     }
 }
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger(__name__)
-# logger = logging.getLogger('loader')
+logger = logging.getLogger('loader')

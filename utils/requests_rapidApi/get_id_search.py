@@ -11,7 +11,6 @@ from keyboards.inline.button_citi import get_button_cities
 from utils.logger import logger
 
 
-
 def get_dest_id(city: str, locale: str, currency: str, state: str) -> Optional[Union[str, InlineKeyboardMarkup]]:
     """
     :param state: State User
@@ -20,27 +19,28 @@ def get_dest_id(city: str, locale: str, currency: str, state: str) -> Optional[U
     :param currency: валюта от локали
     :return: keyboard or None
     """
-    logger.info()
+    logger.info(' ')
     querystring = {"query": city,
                    "locale": locale,
                    "currency": currency}
-    response = requests.request("GET", url_from_cities, headers=headers, params=querystring)
-    if response:
-        logger.info('response')
-        data = json.loads(response.text)
-        entries = list(filter(lambda i_data: i_data['group'] == 'CITY_GROUP', data['suggestions']))[0]['entities']
-        if not entries:
-            logger.error('Нет подходящих вариантов по вашему запросу')
-            return 'Нет подходящих вариантов по вашему запросу'
-        else:
-            temp_dict_button_hotel = {}
-            for i_hotel in entries:
-                if i_hotel['type'] == 'CITY':
-                    current_city = re.sub(r'<[^.]*>\b', '', i_hotel['caption'])
-                    current_city = re.sub(r'<[^.]*>', '', current_city)
-                    call_dat = i_hotel["destinationId"]
-                    temp_dict_button_hotel[current_city] = call_dat
-            return get_button_cities(temp_dict_button_hotel, state)
-    else:
-        logger.error('Not response')
+    try:
+        response = requests.request("GET", url_from_cities, headers=headers, params=querystring)
+        if response:
+            logger.info('response')
+            data = json.loads(response.text)
+            entries = list(filter(lambda i_data: i_data['group'] == 'CITY_GROUP', data['suggestions']))[0]['entities']
+            if not entries:
+                logger.error('Нет подходящих вариантов по вашему запросу')
+                return 'Нет подходящих вариантов по вашему запросу'
+            else:
+                temp_dict_button_hotel = {}
+                for i_hotel in entries:
+                    if i_hotel['type'] == 'CITY':
+                        current_city = re.sub(r'<[^.]*>\b', '', i_hotel['caption'])
+                        current_city = re.sub(r'<[^.]*>', '', current_city)
+                        call_dat = i_hotel["destinationId"]
+                        temp_dict_button_hotel[current_city] = call_dat
+                return get_button_cities(temp_dict_button_hotel, state)
+    except BaseException as e:
+        logger.exception(e)
         return 'Not response'

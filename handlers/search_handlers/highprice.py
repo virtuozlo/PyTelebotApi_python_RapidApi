@@ -168,6 +168,7 @@ def get_photo_info(message: Message) -> None:
     logger.info(f'user_id {message.from_user.id, message.text}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_photo'] = message.text
+        bot.send_message(message.chat.id,'Вывожу отели...')
     user_is_ready(message)
 
 
