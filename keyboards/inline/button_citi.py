@@ -13,7 +13,7 @@ def get_button_cities(dict_buttons: dict, state: str) -> Optional[Union[str, Inl
     """
     logger.info(' ')
     if not dict_buttons:
-        logger.error()
+        logger.error('Не нашел подходящего города')
         return 'Не нашел подходящего города'
     keyboard = InlineKeyboardMarkup(row_width=1)
     try:
