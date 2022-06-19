@@ -1,6 +1,6 @@
 import json
 from typing import List, Optional, Union
-
+from .request_univ import get_response
 import requests
 from config_data.my_config import url_from_properties, headers
 from loader import db_hisory
@@ -80,22 +80,17 @@ def get_properties_list(destination_id: int, checkin: str, checkout: str, sort_o
     if best_string:
         logger.info('BestDeal')
         querystring.update(best_string)
-    try:
-        response = requests.request("GET", url_from_properties, headers=headers, params=querystring)
-        if response:
-            logger.info('response')
-            try:
-                data = json.loads(response.text)['data']['body']['searchResults']['results']
-                if data:
-                    return get_normalize_str(data, user_id, command, total_days)
-                else:
-                    logger.error('Not response')
-                    return 'По вашему запросу ничего не найдено. Попробуйте снова /start'
-            except KeyError as a:
-                logger.error(f'{a}')
-                return 'Ошибка ответа сервера, попробуйте еще раз. /start'
-    except BaseException as e:
-        logger.exception(e)
+    response = get_response(url=url_from_properties, params=querystring, header=headers)
+    if isinstance(response, str):
+        return response
+    else:
+        logger.info('response')
+        data = json.loads(response.text)['data']['body']['searchResults']['results']
+        if data:
+            return get_normalize_str(data, user_id, command, total_days)
+        else:
+            logger.error('No data')
+            return 'По вашему запросу ничего не найдено. Попробуйте снова /start'
 
 
 def get_normalize_str(hotels: dict, user_id: int, command: str, total_days: int) -> Optional[Union[dict, str]]:

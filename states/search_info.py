@@ -1,12 +1,5 @@
-from loader import bot
 from utils.logger import logger
-
-from telebot import custom_filters
 from telebot.handler_backends import State, StatesGroup
-
-from telebot.storage import StateMemoryStorage
-
-state_storage = StateMemoryStorage()
 
 
 class HistoryStates(StatesGroup):
@@ -60,7 +53,3 @@ class BestDealStates(StatesGroup):
     min_price = State()
     max_price = State()
     distance = State()
-
-
-bot.add_custom_filter(custom_filters.StateFilter(bot))
-bot.add_custom_filter(custom_filters.IsDigitFilter())

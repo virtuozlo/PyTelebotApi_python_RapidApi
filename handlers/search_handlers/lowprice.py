@@ -21,9 +21,8 @@ def start_highprice(call):
     :return:
     """
     logger.info(' ')
-    bot.set_state(call.from_user.id, LowPriceStates.cities,call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.cities, call.message.chat.id)
     bot.send_message(call.message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите город для поиска.')
-
 
 
 @bot.message_handler(commands=['lowprice'])
@@ -50,12 +49,12 @@ def get_cities_request(message: Message) -> None:
         data['city'] = message.text
         logger.info(f'user_id {message.from_user.id}')
         keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='low_city')
-        if keyboard.keyboard:
+        if not isinstance(keyboard, str):
             logger.info(f'user_id {message.from_user.id} {message.text}')
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
             logger.error(f'user_id {message.from_user.id}')
-            bot.send_message(message.chat.id, 'Нет подходящего варианта попробуйте еще раз')
+            bot.send_message(message.chat.id, f'{keyboard}')
             bot.set_state(message.from_user.id, LowPriceStates.cities)
 
 
@@ -77,43 +76,6 @@ def button_callback(call: CallbackQuery) -> None:
                      reply_markup=bot_get_keyboard_inline(command='lowprice', state='low_start_date'))
 
 
-@bot.callback_query_handler(func=None, search_config=for_search.filter(state='low_start_date'))
-def callback_start_date(call: CallbackQuery) -> None:
-    """
-    :param call: Выбор пользователя начала поездки
-    """
-    logger.info(f'user_id {call.from_user.id}')
-    bot.set_state(call.from_user.id, LowPriceStates.end_date, call.message.chat.id)
-    data = for_search.parse(callback_data=call.data)
-    my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
-    bot.send_message(call.message.chat.id, 'Выберите дату уезда',
-                     reply_markup=bot_get_keyboard_inline(command='lowprice', state='low_end_date'))
-    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-        data['startday'] = my_exit_date
-        logger.info(f'user_id {call.from_user.id, my_exit_date}')
-        bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, search_config=for_search.filter(state='low_end_date'))
-def callback_end_date(call: CallbackQuery) -> None:
-    """
-    :param call: Окончание поездки
-    """
-    logger.info(f'user_id {call.from_user.id}')
-    data = for_search.parse(callback_data=call.data)
-    my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
-    bot.set_state(call.from_user.id, LowPriceStates.count_hotels, call.message.chat.id)
-    bot.send_message(call.message.chat.id, 'Сколько отелей выводить? ( не более 10)')
-    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-        data['endday'] = my_exit_date
-        data['all_days'] = data['endday'] - data['startday']
-        logger.info(f'user_id {call.from_user.id, my_exit_date}')
-        if data['startday'] > data['endday']:
-            logger.error(f'user_id {call.from_user.id}')
-            data['startday'], data['endday'] = data['endday'], data['startday']
-        bot.edit_message_text(f'Дата выезда: {my_exit_date}', call.message.chat.id, call.message.id)
-
-
 @bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=True, )
 def get_photo_info(message: Message) -> None:
     """
@@ -128,27 +90,6 @@ def get_photo_info(message: Message) -> None:
         data['count_hotels'] = message.text
 
 
-@bot.callback_query_handler(func=None, is_photo=for_photo.filter(photo='False', state='low_photo'))
-def not_photo(call: CallbackQuery) -> None:
-    logger.info(f'user_id {call.from_user.id}')
-    bot.edit_message_text(f'Вывожу результаты', call.message.chat.id, call.message.id)
-    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-        data['photo'] = ''
-    user_is_ready(call.message, call.from_user.id, call.message.chat.id)
-
-
-@bot.callback_query_handler(func=None, is_photo=for_photo.filter(photo='True', state='low_photo'))
-def get_photo_count_info(call: CallbackQuery) -> None:
-    """
-    Запрос количества фотографий отелей. Запись необходимости фото
-    """
-    logger.info(f'user_id {call.from_user.id}')
-    bot.edit_message_text('Сколько фото выводить?(Не более 10)', call.message.chat.id, call.message.id)
-    bot.set_state(call.from_user.id, LowPriceStates.count_photo, call.message.chat.id)
-    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-        data['photo'] = True
-
-
 @bot.message_handler(state=LowPriceStates.count_photo, is_digit=True, count_digit=True)
 def get_photo_info(message: Message) -> None:
     """
@@ -158,8 +99,8 @@ def get_photo_info(message: Message) -> None:
     logger.info(f'user_id {message.from_user.id, message.text}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_photo'] = message.text
-        bot.send_message(message.chat.id,'Вывожу отели...')
-    user_is_ready(message)
+        bot.send_message(message.chat.id, 'Вывожу отели...')
+    user_is_ready_low(message)
 
 
 @bot.message_handler(state=LowPriceStates.count_hotels, is_digit=True, count_digit=False)
@@ -200,7 +141,7 @@ def dont_check_count(message: Message) -> None:
     bot.send_message(message.chat.id, 'Введите число в диапазоне от 1 до 10')
 
 
-def user_is_ready(message: Message, user_id=None, chat_id=None) -> None:
+def user_is_ready_low(message: Message, user_id=None, chat_id=None) -> None:
     """
     Отсюда вызывается метод для обнаружения всех отелей. Здесь же будет записи в БД, может Pickle.
     Всё будет в модуле utils
