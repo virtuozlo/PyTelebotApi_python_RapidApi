@@ -56,7 +56,7 @@ def get_cities_request(message: Message) -> None:
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
             logger.error(f'user_id {message.from_user.id}')
-            bot.send_message(message.chat.id, 'Нет подходящего варианта попробуйте еще раз')
+            bot.send_message(message.chat.id, f'{keyboard}')
             bot.set_state(message.from_user.id, BestDealStates.cities)
 
 

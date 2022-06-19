@@ -21,9 +21,8 @@ def start_highprice(call):
     :return:
     """
     logger.info(' ')
-    bot.set_state(call.from_user.id, LowPriceStates.cities,call.message.chat.id)
+    bot.set_state(call.from_user.id, LowPriceStates.cities, call.message.chat.id)
     bot.send_message(call.message.chat.id, 'Отлично! Вы выбрали поиск недорогих отелей. Выберите город для поиска.')
-
 
 
 @bot.message_handler(commands=['lowprice'])
@@ -50,12 +49,12 @@ def get_cities_request(message: Message) -> None:
         data['city'] = message.text
         logger.info(f'user_id {message.from_user.id}')
         keyboard = get_dest_id(message.text, data['locale'], data['currency'], state='low_city')
-        if not isinstance(keyboard,str):
+        if not isinstance(keyboard, str):
             logger.info(f'user_id {message.from_user.id} {message.text}')
             bot.send_message(message.chat.id, 'Выберите подходящий город:', reply_markup=keyboard)
         else:
             logger.error(f'user_id {message.from_user.id}')
-            bot.send_message(message.chat.id, 'Нет подходящего варианта попробуйте еще раз')
+            bot.send_message(message.chat.id, f'{keyboard}')
             bot.set_state(message.from_user.id, LowPriceStates.cities)
 
 
@@ -100,7 +99,7 @@ def get_photo_info(message: Message) -> None:
     logger.info(f'user_id {message.from_user.id, message.text}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['count_photo'] = message.text
-        bot.send_message(message.chat.id,'Вывожу отели...')
+        bot.send_message(message.chat.id, 'Вывожу отели...')
     user_is_ready_low(message)
 
 
