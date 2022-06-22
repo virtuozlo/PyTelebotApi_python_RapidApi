@@ -67,6 +67,7 @@ def callback_start_date(call: CallbackQuery) -> None:
                               reply_markup=bot_get_keyboard_inline(command=data['state'], state=data['state']))
 
 
+
 @bot.callback_query_handler(func=None, search_config=for_search.filter())
 def callback_end_date(call: CallbackQuery) -> None:
     """
