@@ -3,7 +3,7 @@ from handlers.search_handlers.lowprice import user_is_ready_low
 from loader import bot
 from states.search_info import BestDealStates, HighPriceStates, LowPriceStates
 from utils.logger import logger
-from datetime import date
+from datetime import date, datetime
 from keyboards.inline.calendar_inline.inline_calendar import bot_get_keyboard_inline
 from keyboards.inline.filter import my_date, for_search, for_photo
 from telebot.types import Message, CallbackQuery
@@ -39,26 +39,32 @@ def callback_start_date(call: CallbackQuery) -> None:
     logger.info(f'user_id {call.from_user.id}')
     data = for_search.parse(callback_data=call.data)
     my_exit_date = date(year=int(data['year']), month=int(data['month']), day=int(data['day']))
+    current_date = date.today() <= my_exit_date
     command = ''
     state = ''
-    if data['state'] == 'dest_start_date':
-        bot.set_state(call.from_user.id, BestDealStates.end_date, call.message.chat.id)
-        command = 'bestdeal'
-        state = 'dest_end_date'
-    elif data['state'] == 'low_start_date':
-        bot.set_state(call.from_user.id, LowPriceStates.start_date, call.message.chat.id)
-        command = 'lowprice'
-        state = 'low_end_date'
-    elif data['state'] == 'high_start_date':
-        bot.set_state(call.from_user.id, HighPriceStates.end_date, call.message.chat.id)
-        command = 'highprice'
-        state = 'high_end_date'
-    with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
-        bot.send_message(call.message.chat.id, 'Выберите дату уезда',
-                         reply_markup=bot_get_keyboard_inline(command=command, state=state))
-        logger.info(f'user_id {call.from_user.id} {my_exit_date}')
-        data['startday'] = my_exit_date
-        bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
+    if current_date:
+        if data['state'] == 'dest_start_date':
+            bot.set_state(call.from_user.id, BestDealStates.end_date, call.message.chat.id)
+            command = 'bestdeal'
+            state = 'dest_end_date'
+        elif data['state'] == 'low_start_date':
+            bot.set_state(call.from_user.id, LowPriceStates.start_date, call.message.chat.id)
+            command = 'lowprice'
+            state = 'low_end_date'
+        elif data['state'] == 'high_start_date':
+            bot.set_state(call.from_user.id, HighPriceStates.end_date, call.message.chat.id)
+            command = 'highprice'
+            state = 'high_end_date'
+        with bot.retrieve_data(call.from_user.id, call.message.chat.id) as data:
+            bot.send_message(call.message.chat.id, 'Выберите дату уезда',
+                             reply_markup=bot_get_keyboard_inline(command=command, state=state))
+            logger.info(f'user_id {call.from_user.id} {my_exit_date}')
+            data['startday'] = my_exit_date
+            bot.edit_message_text(f'Дата заезда: {my_exit_date}', call.message.chat.id, call.message.id)
+    else:
+        bot.edit_message_text('Выбранная дата не может быть раньше текущей.\nВыберите дату позднее',
+                              call.message.chat.id, call.message.id,
+                              reply_markup=bot_get_keyboard_inline(command=data['state'], state=data['state']))
 
 
 @bot.callback_query_handler(func=None, search_config=for_search.filter())
@@ -109,7 +115,7 @@ def photo_info(call: CallbackQuery) -> None:
     data = for_photo.parse(callback_data=call.data)
     if data['photo'] == 'False':
         logger.info(f'user_id {call.from_user.id}')
-        if data['state']=='best_state':
+        if data['state'] == 'best_state':
             bot.edit_message_text(f'Введите минимальную цену за ночь', call.message.chat.id, call.message.id)
             bot.set_state(call.from_user.id, BestDealStates.min_price, call.message.chat.id)
         elif data['state'] == 'High_state':
